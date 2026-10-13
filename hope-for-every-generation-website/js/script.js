@@ -1,45 +1,28 @@
 (function () {
-  var pages = document.querySelectorAll('.page');
-  var navLinks = document.querySelectorAll('[data-nav]');
+  // Mobile menu
   var menuToggle = document.getElementById('menuToggle');
   var mainNav = document.getElementById('mainNav');
-  var validPages = ['home', 'about', 'leadership', 'collaboration', 'give'];
-
-  function showPage(id, updateHash) {
-    if (validPages.indexOf(id) === -1) { id = 'home'; }
-
-    pages.forEach(function (p) {
-      p.classList.toggle('active', p.id === 'page-' + id);
+  if (menuToggle && mainNav) {
+    menuToggle.addEventListener('click', function () {
+      var open = mainNav.classList.toggle('open');
+      menuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
-
-    document.querySelectorAll('.main-nav .nav-link').forEach(function (l) {
-      l.classList.toggle('active', l.getAttribute('data-nav') === id);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && mainNav.classList.contains('open')) {
+        mainNav.classList.remove('open');
+        menuToggle.setAttribute('aria-expanded', 'false');
+        menuToggle.focus();
+      }
     });
-
-    if (updateHash !== false) {
-      history.replaceState(null, '', '#' + id);
-    }
-
-    window.scrollTo(0, 0);
-    mainNav.classList.remove('open');
-    menuToggle.setAttribute('aria-expanded', 'false');
   }
 
-  navLinks.forEach(function (el) {
-    el.addEventListener('click', function () {
-      showPage(el.getAttribute('data-nav'));
-    });
-  });
+  // Keep the footer year current
+  var year = document.getElementById('year');
+  if (year) { year.textContent = new Date().getFullYear(); }
 
-  menuToggle.addEventListener('click', function () {
-    var open = mainNav.classList.toggle('open');
-    menuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-
-  window.addEventListener('hashchange', function () {
-    showPage(location.hash.replace('#', ''), false);
-  });
-
-  var initial = (location.hash || '#home').replace('#', '');
-  showPage(initial, false);
+  // Old single-page links (e.g. /#about) now point to their own pages
+  var legacy = { about: 'about.html', leadership: 'leadership.html', collaboration: 'collaboration.html', give: 'give.html' };
+  var hash = location.hash.replace('#', '');
+  var isHome = /(^|\/)(index\.html)?$/.test(location.pathname);
+  if (isHome && legacy[hash]) { location.replace(legacy[hash]); }
 })();
